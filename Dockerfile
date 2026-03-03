@@ -1,28 +1,43 @@
 # ---------- BUILDER ----------
-FROM node:20-alpine AS builder
+FROM node:20-bullseye AS builder
 
 WORKDIR /app
 
 RUN npm install -g pnpm
 
-# Copia tudo primeiro (IMPORTANTE)
+# Declara build args
+ARG DATABASE_URL
+ARG NEXTAUTH_URL
+ARG NEXTAUTH_SECRET
+ARG UPLOADTHING_SECRET
+ARG UPLOADTHING_APP_ID
+ARG RESEND_API_KEY
+ARG GITHUB_CLIENT_ID
+ARG GITHUB_CLIENT_SECRET
+ARG NODE_ENV
+
+# Transforma em ENV para o build
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV UPLOADTHING_SECRET=$UPLOADTHING_SECRET
+ENV UPLOADTHING_APP_ID=$UPLOADTHING_APP_ID
+ENV RESEND_API_KEY=$RESEND_API_KEY
+ENV GITHUB_CLIENT_ID=$GITHUB_CLIENT_ID
+ENV GITHUB_CLIENT_SECRET=$GITHUB_CLIENT_SECRET
+ENV NODE_ENV=$NODE_ENV
+
 COPY . .
 
-# Instala dependências
 RUN pnpm install --frozen-lockfile
-
-# Gera Prisma client explicitamente
 RUN npx prisma generate
-
-# Build Next
 RUN pnpm build
 
 
 # ---------- RUNNER ----------
-FROM node:20-alpine AS runner
+FROM node:20-bullseye AS runner
 
 WORKDIR /app
-
 ENV NODE_ENV=production
 
 RUN npm install -g pnpm
