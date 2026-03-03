@@ -5,15 +5,16 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-
+# Copia tudo primeiro (IMPORTANTE)
 COPY . .
 
-# Prisma generate
+# Instala dependências
+RUN pnpm install --frozen-lockfile
+
+# Gera Prisma client explicitamente
 RUN npx prisma generate
 
-# Build Next.js
+# Build Next
 RUN pnpm build
 
 
